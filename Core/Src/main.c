@@ -199,7 +199,6 @@ int main(void)
   MX_CRC_Init();
   MX_ADC2_Init();
   MX_ADC3_Init();
-  adc_start();
   MX_TouchGFX_Init();
   /* Call PreOsInit function */
   MX_TouchGFX_PreOSInit();
@@ -884,10 +883,10 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA2_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 6, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
   /* DMA2_Stream2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 5, 0);
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 6, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
 
 }

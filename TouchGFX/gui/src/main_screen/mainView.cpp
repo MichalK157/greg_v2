@@ -2,6 +2,7 @@
 #include <touchgfx/Color.hpp>
 #include <touchgfx/hal/HAL.hpp>
 #include <cstdint>
+#include "adc_wrapper.h"
 
 mainView::mainView()
 {
@@ -28,17 +29,18 @@ void mainView::updateScrean()
 	__background.setColor(touchgfx::Color::getColorFromRGB(r++, g++, b++));
 
 	uint16_t* framebuffer = reinterpret_cast<uint16_t*>(touchgfx::HAL::getInstance()->getTFTFrameBuffer());
+	uint32_t* buff = reinterpret_cast<uint32_t*>(get_adc_buffer());
 	if (!framebuffer) {
 	    // Add a debug breakpoint or log an error if framebuffer is null
 	    return;
 	}
 	    uint16_t screenWidth = 800;
 
-	   framebuffer[20 * screenWidth + 0] = (31 << 11) | (63 << 5) | 31;
-	   framebuffer[20 * screenWidth + 1] = (31 << 11) | (63 << 5) | 31;
-	   framebuffer[20 * screenWidth + 2] = (31 << 11) | (63 << 5) | 31;
-	   framebuffer[20 * screenWidth + 3] = (31 << 11) | (63 << 5) | 31;
-	   framebuffer[20 * screenWidth + 4] = (31 << 11) | (63 << 5) | 31;
+	   framebuffer[20 * screenWidth + 0] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
+	   framebuffer[20 * screenWidth + 1] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
+	   framebuffer[20 * screenWidth + 2] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
+	   framebuffer[20 * screenWidth + 3] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
+	   framebuffer[20 * screenWidth + 4] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
 
 
 	touchgfx::HAL::getInstance()->unlockFrameBuffer();

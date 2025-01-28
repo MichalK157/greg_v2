@@ -15,7 +15,11 @@ extern "C"
 
 
 void adc_start();
-uint32_t* get_adc_buffer();
+
+uint8_t get_r();
+uint8_t get_g();
+uint8_t get_b();
+
 
 #ifdef __cplusplus
 }

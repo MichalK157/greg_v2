@@ -40,6 +40,11 @@
 			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/STM32F769I_DISCO.ioc</locationURI>
 		</link>
 		<link>
+			<name>Application/User/data_collector.c</name>
+			<type>1</type>
+			<location>C:/TouchGFXProjects/greg_v2/STM32CubeIDE/Application/User/data_collector.c</location>
+		</link>
+		<link>
 			<name>Application/User/freertos.c</name>
 			<type>1</type>
 			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/Core/Src/freertos.c</locationURI>

@@ -20,7 +20,7 @@ extern "C"
     uint8_t* get_G_buffer();
     uint8_t* get_B_buffer();
 
-    void load_adc_to_buffers(const uint32_t* adc_buffer);
+    void load_adc_to_buffers(int itter);
 
 #ifdef __cplusplus
 }

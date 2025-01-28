@@ -3,6 +3,7 @@
 #include <touchgfx/hal/HAL.hpp>
 #include <cstdint>
 #include "adc_wrapper.h"
+#include "data_collector.h"
 
 mainView::mainView()
 {
@@ -29,18 +30,27 @@ void mainView::updateScrean()
 	__background.setColor(touchgfx::Color::getColorFromRGB(r++, g++, b++));
 
 	uint16_t* framebuffer = reinterpret_cast<uint16_t*>(touchgfx::HAL::getInstance()->getTFTFrameBuffer());
-	uint32_t* buff = reinterpret_cast<uint32_t*>(get_adc_buffer());
+	uint8_t* buff_R = reinterpret_cast<uint8_t*>(get_R_buffer());
+	uint8_t* buff_G = reinterpret_cast<uint8_t*>(get_G_buffer());
+	uint8_t* buff_B = reinterpret_cast<uint8_t*>(get_B_buffer());
+	uint8_t* buff_x = reinterpret_cast<uint8_t*>(get_X_mask_buffer());
+
 	if (!framebuffer) {
 	    // Add a debug breakpoint or log an error if framebuffer is null
 	    return;
 	}
 	    uint16_t screenWidth = 800;
-
-	   framebuffer[20 * screenWidth + 0] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
-	   framebuffer[20 * screenWidth + 1] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
-	   framebuffer[20 * screenWidth + 2] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
-	   framebuffer[20 * screenWidth + 3] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
-	   framebuffer[20 * screenWidth + 4] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
+		uint8_t line_wide = 5;
+	    for (int16_t i = -5; i < line_wide; ++i)  {
+    	       for (int16_t j = 0; j < screenWidth; ++j){
+    	            framebuffer[(100+buff_x[j]+i)*screenWidth+j] = (buff_R[j] << 11) | (buff_G[j] << 5) | buff_B[j];
+    	        }
+    	    }
+	    // framebuffer[20 * screenWidth + 0] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
+	    // framebuffer[20 * screenWidth + 1] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
+	    // framebuffer[20 * screenWidth + 2] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
+	    // framebuffer[20 * screenWidth + 3] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
+	    // framebuffer[20 * screenWidth + 4] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
 
 
 	touchgfx::HAL::getInstance()->unlockFrameBuffer();

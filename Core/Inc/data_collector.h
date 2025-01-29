@@ -16,9 +16,7 @@ extern "C"
     uint8_t* get_X_mask_buffer();
     uint8_t* get_Y_mask_buffer();
 
-    uint8_t* get_R_buffer();
-    uint8_t* get_G_buffer();
-    uint8_t* get_B_buffer();
+    uint16_t* get_pixel_buffer();
 
     void load_adc_to_buffers(int itter);
 

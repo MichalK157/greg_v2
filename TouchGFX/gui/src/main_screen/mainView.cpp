@@ -30,9 +30,7 @@ void mainView::updateScrean()
 	__background.setColor(touchgfx::Color::getColorFromRGB(r++, g++, b++));
 
 	uint16_t* framebuffer = reinterpret_cast<uint16_t*>(touchgfx::HAL::getInstance()->getTFTFrameBuffer());
-	uint8_t* buff_R = reinterpret_cast<uint8_t*>(get_R_buffer());
-	uint8_t* buff_G = reinterpret_cast<uint8_t*>(get_G_buffer());
-	uint8_t* buff_B = reinterpret_cast<uint8_t*>(get_B_buffer());
+	uint16_t* buff_pixel = reinterpret_cast<uint16_t*>(get_pixel_buffer());
 	uint8_t* buff_x = reinterpret_cast<uint8_t*>(get_X_mask_buffer());
 
 	if (!framebuffer) {
@@ -43,15 +41,9 @@ void mainView::updateScrean()
 		uint8_t line_wide = 5;
 	    for (int16_t i = -5; i < line_wide; ++i)  {
     	       for (int16_t j = 0; j < screenWidth; ++j){
-    	            framebuffer[(100+buff_x[j]+i)*screenWidth+j] = (buff_R[j] << 11) | (buff_G[j] << 5) | buff_B[j];
+    	            framebuffer[(50+buff_x[j]+i)*screenWidth+j] = buff_pixel[j];
     	        }
     	    }
-	    // framebuffer[20 * screenWidth + 0] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
-	    // framebuffer[20 * screenWidth + 1] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
-	    // framebuffer[20 * screenWidth + 2] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
-	    // framebuffer[20 * screenWidth + 3] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
-	    // framebuffer[20 * screenWidth + 4] = (buff[2] << 11) | (buff[1] << 5) | buff[0];
-
 
 	touchgfx::HAL::getInstance()->unlockFrameBuffer();
 	touchgfx::Rect rect(0, 0, 800, 480); // Define the area to refresh

@@ -16,6 +16,7 @@ void Model::tick()
 	{
 
 	}*/
+	HAL_GPIO_WritePin(GPIOF, GPIO_PIN_9, GPIO_PIN_SET);
 	modelListener->updateScrean();
-
+	HAL_GPIO_WritePin(GPIOF, GPIO_PIN_9, GPIO_PIN_RESET);
 }

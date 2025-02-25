@@ -4,6 +4,7 @@
 #include <cstdint>
 #include "adc_wrapper.h"
 #include "data_collector.h"
+#include "memory.h"
 
 mainView::mainView()
 {
@@ -27,27 +28,43 @@ void mainView::tearDownScreen()
 void mainView::updateScrean()
 {
 
-	__background.setColor(touchgfx::Color::getColorFromRGB(r++, g++, b++));
+	//__background.setColor(touchgfx::Color::getColorFromRGB(r++, g++, b++));
 
-	uint16_t* framebuffer = reinterpret_cast<uint16_t*>(touchgfx::HAL::getInstance()->getTFTFrameBuffer());
-	uint16_t* buff_pixel = reinterpret_cast<uint16_t*>(get_pixel_buffer());
-	uint8_t* buff_x = reinterpret_cast<uint8_t*>(get_X_mask_buffer());
 
-	if (!framebuffer) {
-	    // Add a debug breakpoint or log an error if framebuffer is null
-	    return;
-	}
+	Status_Frame* status = reinterpret_cast<Status_Frame*>(get_frame_status());
+
+		uint16_t* framebuffer = reinterpret_cast<uint16_t*>(touchgfx::HAL::getInstance()->getTFTFrameBuffer());
+
+		if (!framebuffer) {
+			    // Add a debug breakpoint or log an error if framebuffer is null
+			    return;
+			}
+
+		uint16_t* buff_pixel = reinterpret_cast<uint16_t*>(get_pixel_buffer());
+		uint16_t*swope = reinterpret_cast<uint16_t*>(get_pixel_buffer());
+		if(*status == Status_Frame_New)
+	    {
+			memcpy((uint16_t*)swope,(uint16_t*)buff_pixel,sizeof(uint16_t)*120*200);
+	    	set_frame_status(Status_Frame_Loaded);
+	    }
+		uint16_t row = 120;
+	    uint16_t wide = 200;
 	    uint16_t screenWidth = 800;
-		uint8_t line_wide = 5;
-	    for (int16_t i = -5; i < line_wide; ++i)  {
-    	       for (int16_t j = 0; j < screenWidth; ++j){
-    	            framebuffer[(50+buff_x[j]+i)*screenWidth+j] = buff_pixel[j];
-    	        }
-    	    }
 
-	touchgfx::HAL::getInstance()->unlockFrameBuffer();
-	touchgfx::Rect rect(0, 0, 800, 480); // Define the area to refresh
-	invalidateRect(rect);
+	    for(uint16_t i = 0; i<row;i++)
+	    {
+	    	//memcpy((uint16_t*)framebuffer+i*screenWidth,(uint16_t*)swope+i*wide,sizeof(uint16_t)*wide);
+	    	for(uint16_t j=0; j<wide;j++)
+	    	{
+	    		framebuffer[i*screenWidth + j] = swope[i*wide+j];
+	    	}
+	    }
+
+	    touchgfx::HAL::getInstance()->unlockFrameBuffer();
+	    touchgfx::Rect rect(0, 0, 200,120 ); // Define the area to refresh
+	    invalidateRect(rect);
+
+
 
 }
 

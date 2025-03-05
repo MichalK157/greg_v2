@@ -1,63 +1,32 @@
 #ifndef MAINVIEW_HPP
 #define MAINVIEW_HPP
 
-#include <gui_generated/main_screen/mainViewBase.hpp>
 #include <gui/main_screen/mainPresenter.hpp>
-#include <touchgfx/widgets/Widget.hpp>
+#include <gui_generated/main_screen/mainViewBase.hpp>
 #include <touchgfx/hal/Types.hpp>
+#include <touchgfx/widgets/Widget.hpp>
 
-class CustomSquareWidget : public touchgfx::Widget {
-public:
-    CustomSquareWidget() : x(0), y(0), size(50), color(0xFFFF) {} // Default values
 
-    void setSquareProperties(int16_t x, int16_t y, uint16_t size, uint32_t color) {
-        this->x = x;
-        this->y = y;
-        this->size = size;
-        this->color = color;
-        invalidate(); // Mark the widget for redrawing
-    }
-
-    virtual void draw(const touchgfx::Rect& invalidatedArea) const override {
-    	uint16_t* framebuffer = reinterpret_cast<uint16_t*>(touchgfx::HAL::getInstance()->lockFrameBuffer());
-    	    if (!framebuffer) return;
-
-    	    uint16_t screenWidth = touchgfx::HAL::DISPLAY_WIDTH;
-    	    uint16_t screenHeight = touchgfx::HAL::DISPLAY_HEIGHT;
-
-    	    for (int16_t i = y; i < y + size && i < screenHeight; ++i) {
-    	        for (int16_t j = x; j < x + size && j < screenWidth; ++j) {
-    	            framebuffer[i * screenWidth + j] = static_cast<uint16_t>(color);
-    	        }
-    	    }
-    	    touchgfx::HAL::getInstance()->unlockFrameBuffer();
-    }
-
-    virtual touchgfx::Rect getSolidRect() const override {
-        return touchgfx::Rect(x, y, size, size); // Defines the solid rectangular area of the widget
-    }
-
-private:
-    int16_t x, y;     // Position
-    uint16_t size;    // Square size
-    uint32_t color;   // Color (ARGB or RGB format)
-};
-
+#define SCALE 4
 
 class mainView : public mainViewBase
 {
-public:
-    mainView();
+  public:
+    mainView() : scale(SCALE),counter(0) {}
     virtual ~mainView() {}
     virtual void setupScreen();
     virtual void tearDownScreen();
     virtual void updateScrean();
-protected:
-    uint8_t r,g,b;
-    CustomSquareWidget squareWidget;
+
+  protected:
+    uint8_t scale;
+    uint8_t counter;
+
+  private:
+    void simple_upscale(uint16_t* src, uint16_t* dst, uint16_t src_w, uint16_t src_h, uint16_t dst_w, uint16_t dst_h);
+    void bilinear_upscale(uint16_t* src, uint16_t* dst, uint16_t src_w, uint16_t src_h, uint16_t dst_w, uint16_t dst_h);
+    uint16_t bilinear(uint16_t P00, uint16_t P01, uint16_t P10, uint16_t P11, uint8_t x, uint8_t y);
+    void bresenham_upscale(uint16_t* src, uint16_t* dst, uint16_t src_w, uint16_t src_h, uint16_t dst_w, uint16_t dst_h);
 };
-
-
-
 
 #endif // MAINVIEW_HPP

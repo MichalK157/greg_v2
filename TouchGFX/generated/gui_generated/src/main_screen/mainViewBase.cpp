@@ -7,11 +7,11 @@
 
 mainViewBase::mainViewBase()
 {
-    touchgfx::CanvasWidgetRenderer::setupBuffer(canvasBuffer, CANVAS_BUFFER_SIZE);
+    /*touchgfx::CanvasWidgetRenderer::setupBuffer(canvasBuffer, CANVAS_BUFFER_SIZE);
     
     __background.setPosition(0, 0, 800, 480);
     __background.setColor(touchgfx::Color::getColorFromRGB(127, 125, 124));
-    add(__background);
+    add(__background);*/
 }
 
 mainViewBase::~mainViewBase()

@@ -40,11 +40,11 @@ void set_frame_status(Status_Frame frame_status)
 
 void frame_dump()
 {
-	//memcpy((uint16_t*)rgb_16bit_buffer_swope, (uint16_t*)rgb_16bit_buffer, sizeof(rgb_16bit_buffer_swope));
+	// memcpy((uint16_t*)rgb_16bit_buffer_swope, (uint16_t*)rgb_16bit_buffer, sizeof(rgb_16bit_buffer_swope));
 	status = Status_Frame_New;
 }
 
 void load_adc_to_buffers(int itter)
 {
-	rgb_16bit_buffer[itter] = ((get_r() >> 3) << 11) | ((get_g() >> 2) << 5) | (get_b() >> 3);
+	rgb_16bit_buffer[itter] = ((get_r() &0x1f) << 11) | ((get_g() & 0x3f)<< 5) | ((get_b() & 0x1f));
 }

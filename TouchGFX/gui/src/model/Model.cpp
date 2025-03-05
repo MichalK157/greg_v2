@@ -15,7 +15,6 @@ void Model::tick()
 	/*if(HAL_GPIO_ReadPin(USER_GPIO_GPIO_Port, USER_GPIO_Pin) == GPIO_PIN_SET)
 	{
 
-	}*/
+	}*/	
 	modelListener->updateScrean();
-
 }

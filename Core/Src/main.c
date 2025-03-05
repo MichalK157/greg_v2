@@ -33,7 +33,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#define MAX_ITTER 120*200
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -85,8 +85,6 @@ LTDC_HandleTypeDef hltdc;
 
 QSPI_HandleTypeDef hqspi;
 
-TIM_HandleTypeDef htim10;
-
 SDRAM_HandleTypeDef hsdram1;
 
 /* Definitions for defaultTask */
@@ -112,7 +110,7 @@ const osThreadAttr_t videoTask_attributes = {
 };
 /* USER CODE BEGIN PV */
 
-volatile int itter;
+volatile uint16_t itter;
 
 /* USER CODE END PV */
 
@@ -128,7 +126,6 @@ static void MX_QUADSPI_Init(void);
 static void MX_DMA2D_Init(void);
 static void MX_CRC_Init(void);
 static void MX_ADC2_Init(void);
-static void MX_TIM10_Init(void);
 void StartDefaultTask(void *argument);
 extern void TouchGFX_Task(void *argument);
 extern void videoTaskFunc(void *argument);
@@ -148,7 +145,30 @@ static uint8_t BSP_QSPI_EnableMemoryMappedMode(QSPI_HandleTypeDef *hqspi);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if(GPIO_Pin == FRAME_SYNC_Pin)
+	{
+		//HAL_GPIO_TogglePin(TEST_LED_GPIO_Port, TEST_LED_Pin);
+		itter = 0;
 
+	}
+	if(GPIO_Pin == PIXEL_SYNC_Pin)
+	{
+
+		if(itter < MAX_ITTER)
+		{
+			load_adc_to_buffers(itter);
+			itter++;
+		}
+		else if (itter == MAX_ITTER)
+		{
+			frame_dump();
+		}
+		//HAL_GPIO_TogglePin(TEST_LED_2_GPIO_Port, TEST_LED_2_Pin);
+
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -201,7 +221,6 @@ int main(void)
   MX_LIBJPEG_Init();
   MX_CRC_Init();
   MX_ADC2_Init();
-  MX_TIM10_Init();
   MX_TouchGFX_Init();
   /* Call PreOsInit function */
   MX_TouchGFX_PreOSInit();
@@ -209,7 +228,6 @@ int main(void)
   itter = 0;
   adc_start();
   init_collector();
-  HAL_TIM_Base_Start_IT(&htim10);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -359,7 +377,7 @@ static void MX_ADC2_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_6;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_15CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -775,37 +793,6 @@ static void MX_QUADSPI_Init(void)
 }
 
 /**
-  * @brief TIM10 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM10_Init(void)
-{
-
-  /* USER CODE BEGIN TIM10_Init 0 */
-
-  /* USER CODE END TIM10_Init 0 */
-
-  /* USER CODE BEGIN TIM10_Init 1 */
-
-  /* USER CODE END TIM10_Init 1 */
-  htim10.Instance = TIM10;
-  htim10.Init.Prescaler = 0;
-  htim10.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim10.Init.Period = 4481;
-  htim10.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim10.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
-  if (HAL_TIM_Base_Init(&htim10) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM10_Init 2 */
-
-  /* USER CODE END TIM10_Init 2 */
-
-}
-
-/**
   * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
@@ -899,7 +886,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOJ, GPIO_PIN_13|FRAME_RATE_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOJ, TEST_LED_Pin|TEST_LED_2_Pin|FRAME_RATE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(DSI_RESET_GPIO_Port, DSI_RESET_Pin, GPIO_PIN_SET);
@@ -910,11 +897,14 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(MCU_ACTIVE_GPIO_Port, MCU_ACTIVE_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PJ13 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SYNC_GPIO_Port, SYNC_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pins : TEST_LED_Pin TEST_LED_2_Pin */
+  GPIO_InitStruct.Pin = TEST_LED_Pin|TEST_LED_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOJ, &GPIO_InitStruct);
 
   /*Configure GPIO pin : DSI_RESET_Pin */
@@ -931,12 +921,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : MCU_ACTIVE_Pin */
-  GPIO_InitStruct.Pin = MCU_ACTIVE_Pin;
+  /*Configure GPIO pins : MCU_ACTIVE_Pin SYNC_Pin */
+  GPIO_InitStruct.Pin = MCU_ACTIVE_Pin|SYNC_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  HAL_GPIO_Init(MCU_ACTIVE_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : FRAME_SYNC_Pin PIXEL_SYNC_Pin */
+  GPIO_InitStruct.Pin = FRAME_SYNC_Pin|PIXEL_SYNC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
   /*Configure GPIO pin : USER_GPIO_Pin */
   GPIO_InitStruct.Pin = USER_GPIO_Pin;
@@ -950,6 +946,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(FRAME_RATE_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -1680,15 +1683,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  if(htim->Instance == TIM10)
-  {
-    //HAL_GPIO_TogglePin(GPIOJ, GPIO_PIN_13);
-    load_adc_to_buffers(itter++);
-    if(itter >= MAX_ITER)
-    {
-    	itter = 0;
-    }
-  }
+
   /* USER CODE END Callback 1 */
 }
 

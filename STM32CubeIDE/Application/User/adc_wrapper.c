@@ -15,15 +15,15 @@ void adc_start()
 
 
 
-uint8_t get_rg()
+uint8_t get_r()
 {
 	return (uint8_t) adc_buffer[0];
 }
-uint8_t get_gb()
+uint8_t get_g()
 {
 	return (uint8_t) adc_buffer[1];
 }
-uint8_t get_x()
+uint8_t get_b()
 {
 	return (uint8_t) adc_buffer[2];
 }
